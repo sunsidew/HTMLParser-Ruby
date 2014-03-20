@@ -1,7 +1,7 @@
 # HTMLParser_Ruby.rb
 
 class Input
-	def start # return HTML 
+	def start
 		init
 		return @filename
 	end
@@ -12,27 +12,27 @@ class Input
 	end
 
 	def argv_check
-		if @filename # User type argv input value
-			unless valid_name?(@filename) # Bad argv value
-				name_loop # Terminal input
+		if @filename
+			unless valid_name?(@filename)
+				name_loop
 			end
-		else # argv value is null
+		else
 			name_loop
 		end
 	end
 
-	def name_loop # Process loop until input has valid value
+	def name_loop
 		begin
 			userinput
-			raise unless valid_name?(@filename) # pass rescue(thiscode:28) if file name is invalid
+			raise unless valid_name?(@filename)
 		rescue
-			retry # pass begin(thiscode:25)
+			retry
 		end
 	end
 
 	def valid_name?(name)
-		if name =~ /.html$/ or name =~ /.htm$/ # extension check
-			if File.file?(name) # file exists and is regular
+		if name =~ /.html$/ or name =~ /.htm$/
+			if File.file?(name)
 				return true
 			else
 				puts "File isn't regular or not exists.\n\n"
@@ -89,39 +89,38 @@ class Parse
 			abort
 		end
 
-		@ban = ["html", "body", "title", "head"] # tag to except
+		@ban = ["html", "body", "title", "head"]
 		@tag_name = Array.new
 		@tag_count = Array.new
 		@search_con = Array.new
 	end
 
 	def html_divide(now_line)
-		if now_line.scan(/<.*?>/).count == 1 # No more tag inside except itself == Minimum level
-			now_name = now_line.gsub("<","").scan(/\A[0-9a-zA-Z]*/)[0] # tag name parse
+		if now_line.scan(/<.*?>/).count == 1
+			now_name = now_line.gsub("<","").scan(/\A[0-9a-zA-Z]*/)[0]
 
 			unless @ban.include?(now_name) or now_name == ""
-				if @tag_name.include?(now_name) # tag list check
+				if @tag_name.include?(now_name)
 					@tag_count[@tag_name.index(now_name)] += 1
 				else
-					# tag enroll
 					@tag_name.push(now_name)
 					@tag_count.push(1)
 				end
 			end
 		else
-			now_line.scan(/<.*?>/) do |next_line| # backtracking
+			now_line.scan(/<.*?>/) do |next_line|
 				html_divide(next_line)
 			end
 		end
 	end
 
-	def search_spectag # specific(custom) tag search
+	def search_spectag
 		scrvar_cnt = 0
-		@f.scan(/<script.*?<\/script>/m) do |script_content| # parse 'var' tag inside <script />
+		@f.scan(/<script.*?<\/script>/m) do |script_content|
 			scrvar_cnt += script_content.scan(/var /).count
 		end
 
-		value_cnt = @f.scan(/value=/).count # parse 'value' tag except null value set
+		value_cnt = @f.scan(/value=/).count
 		value_cnt -= @f.scan(/value=""/).count
 
 		# save
